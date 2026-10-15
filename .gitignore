@@ -1,6 +1,33 @@
+# Dependencies
 node_modules/
+.pnpm-store/
+
+# Next.js
 .next/
-.DS_Store
+out/
+
+# NestJS / TypeScript
+dist/
 *.tsbuildinfo
-.env.local
+
+# Hardhat & Blockchain
+artifacts/
+cache/
+typechain-types/
+
+# Uploads & Temp
+uploads/
+tmp/
+.turbo/
+
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Environment Variables
 .env
+.env.local
+.env.production
+.env.staging

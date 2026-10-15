@@ -1,26 +1,21 @@
 {
-  "name": "@bats/web",
-  "version": "0.1.0",
+  "name": "bats-agriguard-website",
   "private": true,
-  "scripts": {
-    "build": "next build",
-    "dev": "next dev --port 3000",
-    "start": "next start",
-    "typecheck": "tsc --noEmit",
-    "test": "echo 'Web smoke tests are covered by build'"
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=22.13.0"
   },
-  "dependencies": {
-    "leaflet": "^1.9.4",
-    "lucide-react": "^1.23.0",
-    "next": "^15.3.3",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+  "scripts": {
+    "build": "turbo build",
+    "dev": "pnpm --parallel --filter @bats/backend --filter @bats/web dev",
+    "dev:backend": "pnpm --filter @bats/backend dev",
+    "dev:web": "pnpm --filter @bats/web dev",
+    "dev:blockchain": "pnpm --filter @bats/blockchain compile",
+    "test": "turbo test",
+    "typecheck": "turbo typecheck"
   },
   "devDependencies": {
-    "@types/leaflet": "^1.9.22",
-    "@types/node": "^22.15.30",
-    "@types/react": "^19.1.6",
-    "@types/react-dom": "^19.1.5",
+    "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   }
 }
