@@ -88,6 +88,8 @@ function LoginInner() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [captcha, setCaptcha] = useState<{ captchaId: string; image: string } | null>(null);
   const [captchaAnswer, setCaptchaAnswer] = useState("");
+  const [captchaLoading, setCaptchaLoading] = useState(false);
+  const [captchaFailed, setCaptchaFailed] = useState(false);
 
   // Forgot password modal
   const [showForgotModal, setShowForgotModal] = useState(false);
@@ -95,14 +97,20 @@ function LoginInner() {
   const [forgotDone, setForgotDone] = useState(false);
 
   const loadCaptcha = async () => {
+    setCaptchaLoading(true);
+    setCaptchaFailed(false);
     try {
       const response = await fetch(`${API_BASE}/auth/captcha`, { cache: "no-store" });
       if (!response.ok) throw new Error("Không thể tạo mã xác thực.");
       const data = await response.json();
       setCaptcha({ captchaId: data.captchaId, image: data.image });
       setCaptchaAnswer("");
+      setCaptchaFailed(false);
     } catch {
       setCaptcha(null);
+      setCaptchaFailed(true);
+    } finally {
+      setCaptchaLoading(false);
     }
   };
 
@@ -406,8 +414,12 @@ function LoginInner() {
                 <div className="captchaControls">
                   {captcha ? (
                     <img className="captchaImage" src={captcha.image} alt="Mã xác thực" />
-                  ) : (
+                  ) : captchaLoading ? (
                     <div className="captchaImage captchaLoading" aria-live="polite">Đang tạo mã…</div>
+                  ) : (
+                    <button type="button" onClick={() => void loadCaptcha()} className="captchaImage captchaRetryBtn" aria-live="polite" style={{ cursor: "pointer", background: "#fef2f2", color: "#b91c1c", fontSize: 13, border: "1px dashed #f87171" }}>
+                      ⚠️ Lỗi nạp mã. Bấm thử lại
+                    </button>
                   )}
                   <input
                     id="login-captcha"
