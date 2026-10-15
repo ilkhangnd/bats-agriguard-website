@@ -57,7 +57,7 @@ export default function SettingsPage() {
   const [isAddingYieldReference, setIsAddingYieldReference] = useState(false);
   const [yieldReferenceDraft, setYieldReferenceDraft] = useState<YieldReference>({ product: "", area: "", season: "", yieldKgPerHa: "" });
 
-  const api = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+  const api = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/+$/, "");
 
   const fetchPolicy = useCallback(async () => {
     try {

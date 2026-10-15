@@ -23,7 +23,7 @@ import {
   RefreshCw
 } from "lucide-react";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const API_BASE = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000").replace(/\/+$/, "");
 
 function saveAuthSession(actor: {
   id: string;
@@ -96,19 +96,19 @@ function LoginInner() {
   const [forgotInput, setForgotInput] = useState("");
   const [forgotDone, setForgotDone] = useState(false);
 
-  const loadCaptcha = async () => {
+  const loadCaptcha = async (retry = 0) => {
     setCaptchaLoading(true);
-    setCaptchaFailed(false);
     try {
       const response = await fetch(`${API_BASE}/auth/captcha`, { cache: "no-store" });
       if (!response.ok) throw new Error("Không thể tạo mã xác thực.");
       const data = await response.json();
       setCaptcha({ captchaId: data.captchaId, image: data.image });
       setCaptchaAnswer("");
-      setCaptchaFailed(false);
     } catch {
       setCaptcha(null);
-      setCaptchaFailed(true);
+      if (retry < 2) {
+        setTimeout(() => void loadCaptcha(retry + 1), 2000);
+      }
     } finally {
       setCaptchaLoading(false);
     }
@@ -414,12 +414,17 @@ function LoginInner() {
                 <div className="captchaControls">
                   {captcha ? (
                     <img className="captchaImage" src={captcha.image} alt="Mã xác thực" />
-                  ) : captchaLoading ? (
-                    <div className="captchaImage captchaLoading" aria-live="polite">Đang tạo mã…</div>
                   ) : (
-                    <button type="button" onClick={() => void loadCaptcha()} className="captchaImage captchaRetryBtn" aria-live="polite" style={{ cursor: "pointer", background: "#fef2f2", color: "#b91c1c", fontSize: 13, border: "1px dashed #f87171" }}>
-                      ⚠️ Lỗi nạp mã. Bấm thử lại
-                    </button>
+                    <div
+                      className="captchaImage captchaLoading"
+                      onClick={() => void loadCaptcha()}
+                      aria-live="polite"
+                      role="button"
+                      tabIndex={0}
+                      style={{ cursor: "pointer", userSelect: "none" }}
+                    >
+                      {captchaLoading ? "Đang tạo mã…" : "Đổi mã"}
+                    </div>
                   )}
                   <input
                     id="login-captcha"

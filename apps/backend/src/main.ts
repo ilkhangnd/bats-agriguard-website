@@ -27,6 +27,12 @@ if (process.env.NODE_ENV === "production") {
 }
 
 const app = await NestFactory.create(AppModule);
+app.use((req: any, _res: any, next: any) => {
+  if (req.url && req.url.includes("//")) {
+    req.url = req.url.replace(/\/+/g, "/");
+  }
+  next();
+});
 app.enableShutdownHooks();
 app.use(
   (

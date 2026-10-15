@@ -153,7 +153,7 @@ export default function PublicVerifyPage() {
     setSearchQuery(resolvedId);
 
     // Attempt to fetch fresh data from backend public API
-    const api = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+    const api = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/+$/, "");
     fetch(`${api}/verify/${resolvedId}/public`)
       .then((res) => (res.ok ? res.json() : null))
       .then((remote) => {

@@ -11,7 +11,7 @@ type EventStatus = "harvested" | "collected" | "packed" | "shipped";
 type TraceEvent = { eventTime: string; status: EventStatus };
 type Batch = { id: string; variety: string; quantityKg: number; status: EventStatus; riskBand: "green" | "yellow" | "red"; createdAt: string; identity: { gtin: string; lot: string; serial: string }; events: TraceEvent[] };
 
-const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const api = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000").replace(/\/+$/, "");
 const roleTitle: Record<Role, string> = { FARMER: "Dữ liệu đồng bộ của nông hộ", COLLECTOR: "Dữ liệu đồng bộ của điểm thu mua", COOPERATIVE: "Dữ liệu đồng bộ của Hợp tác xã", ADMIN: "Tổng quan dữ liệu BATS" };
 const roleNote: Record<Role, string> = { FARMER: "Bạn ghi Thu hoạch trên Zalo Mini App. Website chỉ cập nhật khi sự kiện được đồng bộ thành công.", COLLECTOR: "Bạn ghi Bàn giao trên Zalo Mini App. Website hiển thị các lô đã có sự kiện của bạn.", COOPERATIVE: "Theo dõi dữ liệu đã đồng bộ để điều phối, tổ chức hồ sơ và phản hồi yêu cầu kết nối.", ADMIN: "Quản trị dữ liệu, vùng trồng và hàng chờ kiểm tra trong khu vực quản trị." };
 const statusLabel: Record<EventStatus, string> = { harvested: "Đã thu hoạch", collected: "Đã thu gom", packed: "Đã đóng gói", shipped: "Đã xuất hàng" };

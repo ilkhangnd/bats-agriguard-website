@@ -8,7 +8,7 @@ type Role = "FARMER" | "COLLECTOR" | "COOPERATIVE" | "ADMIN";
 type Profile = { name: string; role: Role; actorId?: string; accessToken?: string };
 type Lot = { id: string; crop: string; variety: string; quantityKg: number; status: string; riskBand: string; createdAt: string; plantingAreaCode?: string; province?: string; district?: string; identity: { gtin: string; lot: string; serial: string } };
 type ConnectRequest = { id: string; batchId: string; requesterName: string; requesterOrganization?: string; quantityKg: number; proposedPickupDate?: string; note?: string; status: "pending" | "accepted" | "declined"; createdAt: string };
-const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
+const api = (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000").replace(/\/+$/, "");
 
 const cropLabel: Record<string, string> = { durian: "Sầu riêng", mango: "Xoài", coffee: "Cà phê", dragon_fruit: "Thanh long", pomelo: "Bưởi", longan: "Nhãn", avocado: "Bơ", mangosteen: "Măng cụt" };
 const requestLabel = { pending: "Chờ phản hồi", accepted: "Đã chấp nhận", declined: "Không tiếp nhận" };
