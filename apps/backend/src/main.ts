@@ -69,7 +69,8 @@ app.enableCors({
     const localDevelopmentOrigin =
       process.env.NODE_ENV !== "production" &&
       /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin ?? "");
-    if (!origin || configuredOrigins.includes(origin) || localDevelopmentOrigin) {
+    const isVercelOrigin = origin ? /^https:\/\/[a-zA-Z0-9_-]+\.vercel\.app$/.test(origin) : false;
+    if (!origin || configuredOrigins.includes(origin) || localDevelopmentOrigin || isVercelOrigin) {
       callback(null, true);
       return;
     }
@@ -96,4 +97,4 @@ if (process.env.OPENAPI_ENABLED !== "false") {
     swaggerOptions: { persistAuthorization: true }
   });
 }
-await app.listen(Number(process.env.API_PORT ?? 4000));
+await app.listen(Number(process.env.PORT ?? process.env.API_PORT ?? 4000), "0.0.0.0");
