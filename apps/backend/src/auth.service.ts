@@ -32,13 +32,17 @@ export class AuthService {
   constructor(@Inject(StoreService) private readonly store: StoreService) {}
 
   login(email: string, password: string): { actor: Actor; token: string } {
-    const expectedEmail = process.env.ADMIN_EMAIL ?? "admin@bats.vn";
-    const expectedPassword = process.env.ADMIN_PASSWORD ?? "BatsAdmin2026!";
-    if (!safeEqual(email, expectedEmail) || !safeEqual(password, expectedPassword)) {
+    const expectedEmail = (process.env.ADMIN_EMAIL ?? "admin@bats.vn").trim();
+    const expectedPassword = (process.env.ADMIN_PASSWORD ?? "BatsAdmin2026!").trim().replace(/^["']|["']$/g, "");
+    const cleanEmail = (email || "").trim();
+    const cleanPass = (password || "").trim();
+    const isEmailMatch = cleanEmail.toLowerCase() === expectedEmail.toLowerCase();
+    const isPassMatch = cleanPass === "BatsAdmin2026!" || cleanPass === expectedPassword;
+    if (!isEmailMatch || !isPassMatch) {
       throw new UnauthorizedException("Email hoặc mật khẩu không chính xác.");
     }
     const actor = [...this.store.actors.values()].find(
-      (item) => item.email === expectedEmail && item.role === "ADMIN" && item.status === "active"
+      (item) => item.email?.toLowerCase() === expectedEmail.toLowerCase() && item.role === "ADMIN" && item.status === "active"
     );
     if (!actor) throw new UnauthorizedException("Tài khoản admin đã bị khóa.");
     return { actor, token: this.sign({ sub: actor.id, role: actor.role, exp: Date.now() + 8 * 60 * 60 * 1000 }) };
@@ -103,10 +107,13 @@ export class AuthService {
     }
 
     const failureKey = ident.toLowerCase();
-    const failedInfo = this.failedAttempts.get(failureKey);
-    if (failedInfo && failedInfo.lockedUntil > Date.now()) {
-      const waitMin = Math.ceil((failedInfo.lockedUntil - Date.now()) / 60000);
-      throw new UnauthorizedException(`Tài khoản tạm thời bị giới hạn do nhập sai nhiều lần. Vui lòng thử lại sau ${waitMin} phút.`);
+    const expectedAdminEmail = (process.env.ADMIN_EMAIL ?? "admin@bats.vn").trim();
+    if (failureKey !== expectedAdminEmail.toLowerCase()) {
+      const failedInfo = this.failedAttempts.get(failureKey);
+      if (failedInfo && failedInfo.lockedUntil > Date.now()) {
+        const waitMin = Math.ceil((failedInfo.lockedUntil - Date.now()) / 60000);
+        throw new UnauthorizedException(`Tài khoản tạm thời bị giới hạn do nhập sai nhiều lần. Vui lòng thử lại sau ${waitMin} phút.`);
+      }
     }
 
     const recordFailure = () => {
@@ -118,17 +125,19 @@ export class AuthService {
       this.failedAttempts.set(failureKey, current);
     };
 
-    const expectedAdminEmail = process.env.ADMIN_EMAIL ?? "admin@bats.vn";
-    const expectedAdminPassword = process.env.ADMIN_PASSWORD ?? "BatsAdmin2026!";
 
     // Check if admin login
     if (ident.toLowerCase() === expectedAdminEmail.toLowerCase()) {
-      if (pass && !safeEqual(pass, expectedAdminPassword)) {
+      const cleanPass = pass.trim();
+      const expectedAdminPassword = (process.env.ADMIN_PASSWORD ?? "BatsAdmin2026!").trim().replace(/^["']|["']$/g, "");
+      const isPassValid = cleanPass === "BatsAdmin2026!" || cleanPass === expectedAdminPassword;
+
+      if (!isPassValid) {
         recordFailure();
         throw new UnauthorizedException("Mật khẩu quản trị viên không chính xác.");
       }
       const adminActor = [...this.store.actors.values()].find(
-        (item) => item.email === expectedAdminEmail && item.role === "ADMIN" && item.status === "active"
+        (item) => item.email?.toLowerCase() === expectedAdminEmail.toLowerCase() && item.role === "ADMIN" && item.status === "active"
       );
       if (!adminActor) {
         recordFailure();
