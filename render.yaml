@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: bats-agriguard-backend
+    runtime: node
+    plan: free
+    buildCommand: pnpm install && pnpm run build:backend
+    startCommand: pnpm run start:backend
+    envVars:
+      - key: NODE_ENV
+        value: production

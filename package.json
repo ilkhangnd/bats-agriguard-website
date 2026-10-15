@@ -7,12 +7,26 @@
   },
   "scripts": {
     "build": "turbo build",
+    "build:backend": "pnpm --filter @bats/shared-types build && pnpm --filter @bats/backend build",
+    "start:backend": "node apps/backend/dist/main.js",
     "dev": "pnpm --parallel --filter @bats/backend --filter @bats/web dev",
     "dev:backend": "pnpm --filter @bats/backend dev",
     "dev:web": "pnpm --filter @bats/web dev",
     "dev:blockchain": "pnpm --filter @bats/blockchain compile",
     "test": "turbo test",
     "typecheck": "turbo typecheck"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "@scarf/scarf",
+      "esbuild",
+      "keccak",
+      "prisma",
+      "secp256k1",
+      "sharp"
+    ]
   },
   "devDependencies": {
     "turbo": "^2.5.4",

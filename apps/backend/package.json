@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nest build",
+    "build": "prisma generate --schema prisma/schema.prisma && nest build",
     "db:deploy": "cd ../.. && apps/backend/node_modules/.bin/prisma migrate deploy --schema apps/backend/prisma/schema.prisma",
     "db:generate": "cd ../.. && apps/backend/node_modules/.bin/prisma generate --schema apps/backend/prisma/schema.prisma",
     "db:seed": "cd ../.. && node --env-file=.env apps/backend/prisma/seed.mjs",
