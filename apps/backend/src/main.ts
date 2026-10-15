@@ -70,7 +70,8 @@ app.enableCors({
       process.env.NODE_ENV !== "production" &&
       /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin ?? "");
     const isVercelOrigin = origin ? /^https:\/\/[a-zA-Z0-9_-]+\.vercel\.app$/.test(origin) : false;
-    if (!origin || configuredOrigins.includes(origin) || localDevelopmentOrigin || isVercelOrigin) {
+    const isCustomDomain = origin ? /^https:\/\/([a-zA-Z0-9_-]+\.)?bats-agriguard\.id\.vn$/.test(origin) : false;
+    if (!origin || configuredOrigins.includes(origin) || localDevelopmentOrigin || isVercelOrigin || isCustomDomain) {
       callback(null, true);
       return;
     }
