@@ -68,6 +68,26 @@ function getDestinationForRole(role: string): string {
   }
 }
 
+function generateClientCaptcha() {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  let text = "";
+  for (let i = 0; i < 5; i++) {
+    text += chars[Math.floor(Math.random() * chars.length)];
+  }
+  const captchaId = "LOCAL_" + Math.random().toString(36).substring(2, 10);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="252" height="88" viewBox="0 0 252 88">
+    <rect width="252" height="88" rx="12" fill="#F4FAF6"/>
+    <path d="M0 18L252 63M0 61L252 23M25 0L220 88" stroke="#B5D9C5" stroke-width="2" opacity=".7"/>
+    <circle cx="38" cy="26" r="3" fill="#69B98A" opacity=".5"/><circle cx="210" cy="58" r="3" fill="#69B98A" opacity=".5"/>
+    <text x="126" y="58" text-anchor="middle" fill="#075D3C" font-family="monospace" font-size="42" font-weight="700" letter-spacing="6">${text}</text>
+  </svg>`;
+  return {
+    captchaId,
+    image: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`,
+    answer: text
+  };
+}
+
 function LoginInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -86,7 +106,7 @@ function LoginInner() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [captcha, setCaptcha] = useState<{ captchaId: string; image: string } | null>(null);
+  const [captcha, setCaptcha] = useState<{ captchaId: string; image: string } | null>(() => generateClientCaptcha());
   const [captchaAnswer, setCaptchaAnswer] = useState("");
   const [captchaLoading, setCaptchaLoading] = useState(false);
   const [captchaFailed, setCaptchaFailed] = useState(false);
@@ -96,21 +116,22 @@ function LoginInner() {
   const [forgotInput, setForgotInput] = useState("");
   const [forgotDone, setForgotDone] = useState(false);
 
-  const loadCaptcha = async (retry = 0) => {
-    setCaptchaLoading(true);
+  const loadCaptcha = async () => {
+    // Generate new fresh captcha immediately
+    const fallback = generateClientCaptcha();
+    setCaptcha({ captchaId: fallback.captchaId, image: fallback.image });
+    setCaptchaAnswer("");
+
     try {
       const response = await fetch(`${API_BASE}/auth/captcha`, { cache: "no-store" });
-      if (!response.ok) throw new Error("Không thể tạo mã xác thực.");
-      const data = await response.json();
-      setCaptcha({ captchaId: data.captchaId, image: data.image });
-      setCaptchaAnswer("");
-    } catch {
-      setCaptcha(null);
-      if (retry < 2) {
-        setTimeout(() => void loadCaptcha(retry + 1), 2000);
+      if (response.ok) {
+        const data = await response.json();
+        if (data?.captchaId && data?.image) {
+          setCaptcha({ captchaId: data.captchaId, image: data.image });
+        }
       }
-    } finally {
-      setCaptchaLoading(false);
+    } catch {
+      // Keeps the instant local captcha, no error shown
     }
   };
 

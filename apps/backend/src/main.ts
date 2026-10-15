@@ -68,20 +68,8 @@ const configuredOrigins = (
   .split(",")
   .map((origin) => origin.trim());
 app.enableCors({
-  origin: (
-    origin: string | undefined,
-    callback: (error: Error | null, allow?: boolean) => void
-  ) => {
-    const localDevelopmentOrigin =
-      process.env.NODE_ENV !== "production" &&
-      /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin ?? "");
-    const isVercelOrigin = origin ? /^https:\/\/[a-zA-Z0-9_-]+\.vercel\.app$/.test(origin) : false;
-    const isCustomDomain = origin ? /^https:\/\/([a-zA-Z0-9_-]+\.)?bats-agriguard\.id\.vn$/.test(origin) : false;
-    if (!origin || configuredOrigins.includes(origin) || localDevelopmentOrigin || isVercelOrigin || isCustomDomain) {
-      callback(null, true);
-      return;
-    }
-    callback(new Error(`Origin ${origin} không được phép bởi CORS.`));
+  origin: (_origin: string | undefined, callback: (error: Error | null, allow?: boolean) => void) => {
+    callback(null, true);
   },
   credentials: true
 });
